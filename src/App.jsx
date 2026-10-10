@@ -55,7 +55,7 @@ export default function App() {
             return <VideoCard key={i} src={b.src} poster={b.poster} caption={b.caption} />;
           }
           if (b.type === "voice") {
-            return <VoiceNote key={i} src={b.src} intro={b.intro} />;
+            return <VoiceNote key={i} src={b.src} fallback={b.fallback} intro={b.intro} />;
           }
           return null;
         })}

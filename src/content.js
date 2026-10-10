@@ -25,7 +25,7 @@ export const content = {
     { type: "photo", src: "/media/photo-4.jpg", caption: "exactly as I remembered" },
 
     { type: "text", text: "You make me feel like the world is mine." },
-    { type: "voice", src: "/media/voice-note.m4a", intro: "I recorded this for you. Headphones on. 🤍" },
+    { type: "voice", src: "/media/voice-note.m4a", fallback: "/media/voice-note.wav", intro: "I recorded this for you. Headphones on. 🤍" },
     { type: "photo", src: "/media/photo-5.jpg", caption: "us" },
     { type: "photo", src: "/media/photo-6.jpg", caption: "my calm" },
 

@@ -107,7 +107,7 @@ export function VideoCard({ src, poster, caption }) {
 }
 
 /* Voice note: never autoplays. Custom round play button + progress. */
-export function VoiceNote({ src, intro }) {
+export function VoiceNote({ src, fallback, intro }) {
   const audio = useRef(null);
   const [playing, setPlaying] = useState(false);
   const [t, setT] = useState(0);
@@ -136,8 +136,9 @@ export function VoiceNote({ src, intro }) {
       // stop any playing videos first
       document.dispatchEvent(new CustomEvent("one-video", { detail: null }));
       document.querySelectorAll("video").forEach((v) => v.pause());
-      a.play();
-      setPlaying(true);
+      const p = a.play();
+      if (p && p.then) p.then(() => setPlaying(true)).catch(() => setPlaying(false));
+      else setPlaying(true);
     } else {
       a.pause();
       setPlaying(false);
@@ -165,7 +166,10 @@ export function VoiceNote({ src, intro }) {
           {fmt(t)} / {fmt(dur)}
         </span>
       </div>
-      <audio ref={audio} src={src} preload="metadata" />
+      <audio ref={audio} preload="metadata">
+        <source src={src} />
+        {fallback && <source src={fallback} />}
+      </audio>
     </Reveal>
   );
 }
