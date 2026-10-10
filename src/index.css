@@ -1,0 +1,264 @@
+/* A_Letter_To_My_Girl — minimal + cute. Black first, phone first. */
+:root {
+  --ink: #0a0a0a;
+  --paper: #faf6f0;
+  --paper-deep: #f3ece2;
+  --blush: #f4c2c2;
+  --gold: #d4af37;
+  --muted: rgba(250, 246, 240, 0.62);
+  --hand: "Caveat", "Segoe Script", cursive;
+  --sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+.wrap {
+  min-height: 100svh;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 24px 18px 80px;
+  position: relative;
+}
+
+/* ---- sealed state ---- */
+.sealed {
+  min-height: 88svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  text-align: center;
+}
+.env {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 24px;
+  -webkit-tap-highlight-color: transparent;
+}
+.env-body {
+  position: relative;
+  display: block;
+  width: 220px;
+  height: 150px;
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: transform 0.3s ease;
+}
+.env:active .env-body { transform: scale(0.97); }
+.env-flap {
+  position: absolute;
+  inset: 0 0 50% 0;
+  background: #262626;
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  transform-origin: top;
+  transition: transform 0.7s ease;
+  z-index: 2;
+}
+.env.open .env-flap { transform: rotateX(180deg); }
+.env-letter {
+  position: absolute;
+  left: 50%;
+  top: 60%;
+  transform: translate(-50%, -30%);
+  font-size: 44px;
+  transition: transform 0.8s ease 0.25s;
+  z-index: 1;
+}
+.env.open .env-letter { transform: translate(-50%, -140%); }
+.env-seal {
+  position: absolute;
+  left: 50%;
+  top: 44%;
+  transform: translate(-50%, -50%);
+  font-size: 34px;
+  z-index: 3;
+  transition: opacity 0.3s ease;
+}
+.env.open .env-seal { opacity: 0; }
+.for {
+  font-family: var(--hand);
+  font-size: 40px;
+  margin: 12px 0 0;
+  font-weight: 600;
+}
+.hint {
+  color: var(--muted);
+  font-size: 13px;
+  letter-spacing: 0.4px;
+  animation: pulse 2s infinite;
+}
+@keyframes pulse { 50% { opacity: 0.5; } }
+
+/* ---- letter ---- */
+.mini-env {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  z-index: 20;
+  background: #1c1c1c;
+  border: 1px solid #333;
+  border-radius: 999px;
+  font-size: 18px;
+  padding: 8px 10px;
+  cursor: pointer;
+}
+.letter { display: flex; flex-direction: column; gap: 26px; padding-top: 30px; }
+
+.reveal {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+.reveal.on { opacity: 1; transform: none; }
+
+.opening h1 {
+  font-family: var(--hand);
+  font-size: 52px;
+  text-align: center;
+  margin: 30px 0 10px;
+}
+.prose p {
+  font-family: var(--hand);
+  font-size: 27px;
+  line-height: 1.35;
+  margin: 0;
+  padding: 0 4px;
+}
+
+.card {
+  background: var(--paper);
+  color: var(--ink);
+  border-radius: 18px;
+  padding: 10px 10px 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+}
+.card img, .card video {
+  width: 100%;
+  border-radius: 12px;
+  display: block;
+  background: #000;
+}
+.card img { aspect-ratio: auto; }
+.card video { max-height: 70svh; }
+.cap {
+  font-family: var(--hand);
+  font-size: 21px;
+  text-align: center;
+  margin: 8px 4px 0;
+}
+.vwrap {
+  position: relative;
+  display: block;
+  width: 100%;
+  border: none;
+  background: #000;
+  border-radius: 12px;
+  padding: 0;
+  cursor: pointer;
+}
+.vplay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 12px;
+}
+.vhint {
+  text-align: center;
+  font-size: 12px;
+  color: #6b6259;
+  margin: 4px 0 0;
+}
+
+/* voice */
+.voice { padding: 16px 14px; }
+.vintro { font-family: var(--hand); font-size: 23px; margin: 0 0 12px; text-align: center; }
+.vrow { display: flex; align-items: center; gap: 12px; }
+.vbtn {
+  width: 52px; height: 52px;
+  border-radius: 999px;
+  border: none;
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 18px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.vtrack { flex: 1; height: 6px; background: var(--paper-deep); border-radius: 999px; overflow: hidden; }
+.vfill { height: 100%; background: var(--ink); width: 0%; }
+.vtime { font-size: 12px; color: #6b6259; min-width: 76px; text-align: right; }
+
+/* ask */
+.ask { text-align: center; padding: 40px 0 10px; }
+.ask-setup { font-family: var(--hand); font-size: 26px; color: var(--muted); margin: 0 0 8px; }
+.ask-q { font-family: var(--hand); font-size: 38px; line-height: 1.2; margin: 0 0 22px; }
+.ask-box {
+  position: relative;
+  min-height: 170px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+.btn-yes {
+  background: var(--paper);
+  color: var(--ink);
+  border: none;
+  border-radius: 999px;
+  font-size: 20px;
+  font-weight: 700;
+  padding: 14px 40px;
+  cursor: pointer;
+  min-height: 52px;
+  transition: transform 0.25s ease;
+}
+.btn-no {
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid #444;
+  border-radius: 999px;
+  font-size: 16px;
+  padding: 12px 28px;
+  cursor: pointer;
+  min-height: 48px;
+  touch-action: none;
+}
+.btn-no.small { font-size: 13px; padding: 8px 18px; opacity: 0.7; }
+.nodges { color: var(--blush); font-size: 14px; margin-top: 12px; }
+.ask.done { padding: 60px 0; }
+.yesmsg { font-family: var(--hand); font-size: 44px; margin: 12px 0 4px; }
+.yes-sub { color: var(--muted); }
+
+.hearts { display: flex; justify-content: center; gap: 6px; font-size: 26px; }
+.hearts.burst span {
+  display: inline-block;
+  animation: float 1.6s ease infinite;
+  animation-delay: var(--d);
+}
+@keyframes float {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-14px) translateX(var(--x)); }
+  100% { transform: translateY(0); }
+}
+
+.foot { text-align: center; color: var(--muted); font-family: var(--hand); font-size: 24px; padding: 30px 0 10px; }
+
+@media (min-width: 520px) {
+  .opening h1 { font-size: 60px; }
+  .prose p { font-size: 29px; }
+}
