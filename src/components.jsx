@@ -9,7 +9,7 @@ export function Heart({ className = "" }) {
   );
 }
 
-function WaxSeal() {
+export function WaxSeal() {
   return (
     <svg viewBox="0 0 64 64" aria-hidden="true" focusable="false">
       <defs>
@@ -71,6 +71,26 @@ function Zoomable({ src, alt, lazy = false }) {
       </button>
       {open && createPortal(<Lightbox src={src} alt={alt} onClose={close} />, document.body)}
     </>
+  );
+}
+
+/* Loading gate UI (see usePreload in App.jsx). */
+
+export function Loader({ loaded, total }) {
+  const pct = total === 0 ? 100 : Math.round((loaded / total) * 100);
+  return (
+    <main className="wrap loader-wrap">
+      <div className="loader" role="status" aria-label={`Loading our memories, ${pct} percent`}>
+        <div className="loader-seal">
+          <WaxSeal />
+        </div>
+        <p className="loader-title">For my girl</p>
+        <div className="loader-track">
+          <div className="loader-fill" style={{ width: `${pct}%` }} />
+        </div>
+        <p className="loader-count">{pct}%</p>
+      </div>
+    </main>
   );
 }
 

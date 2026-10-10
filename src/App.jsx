@@ -1,8 +1,19 @@
 import { useEffect, useRef, useState } from "react";
 import { content } from "./content.js";
-import { AskBlock, Envelope, Heart, Keepsake, PhotoCard, Reveal, VideoCard, VoiceNote, YES_KEY } from "./components.jsx";
+import { AskBlock, Envelope, Heart, Keepsake, Loader, PhotoCard, Reveal, VideoCard, VoiceNote, YES_KEY } from "./components.jsx";
 
 const EASE = "cubic-bezier(.2,.7,.2,1)";
+
+// Every file the page shows: photos, video posters, clips, voice note. Duplicates removed.
+const ASSETS = (() => {
+  const urls = [];
+  for (const b of content.blocks) {
+    if (b.type === "photo") urls.push(b.src);
+    else if (b.type === "video") urls.push(b.poster, b.src);
+    else if (b.type === "voice") urls.push(b.src);
+  }
+  return [...new Set(urls)];
+})();
 
 // When she said yes (ISO string) or null. /?reset=1 clears it so you can test again.
 const readYes = () => {
@@ -18,12 +29,48 @@ const readYes = () => {
   }
 };
 
+// Warms every photo, poster, clip and the voice note into the browser cache,
+// with honest progress. A failed file still resolves (it must never trap her),
+// plus an overall failsafe so the page always opens.
+function usePreload(urls) {
+  const [loaded, setLoaded] = useState(0);
+  const [done, setDone] = useState(urls.length === 0);
+  useEffect(() => {
+    if (urls.length === 0) return;
+    let alive = true;
+    const t0 = performance.now();
+    let n = 0;
+    const tick = () => {
+      n += 1;
+      if (!alive) return;
+      setLoaded(n);
+      if (n >= urls.length) {
+        const wait = Math.max(0, 600 - (performance.now() - t0)); // no flash on fast networks
+        setTimeout(() => alive && setDone(true), wait);
+      }
+    };
+    urls.forEach((url) => {
+      fetch(url).then(() => tick()).catch(() => tick());
+    });
+    const failsafe = setTimeout(() => alive && setDone(true), 30000);
+    return () => {
+      alive = false;
+      clearTimeout(failsafe);
+    };
+    // ASSETS is a static module constant; preload once.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  return { loaded, total: urls.length, done };
+}
+
 export default function App() {
   // sealed -> opening (flap) -> unfolding (card slips out + unfolds) -> flying (envelope to corner) -> opened
   const [savedAt] = useState(readYes);
   const [reread, setReread] = useState(false);
   const [phase, setPhase] = useState(() => (savedAt ? "opened" : "sealed"));
   const photos = content.blocks.filter((b) => b.type === "photo").map((b) => b.src);
+  // Everything on screen waits for these: photos, posters, clips, voice note.
+  const { loaded, total, ready } = usePreload(ASSETS);
   const envRef = useRef(null);
   const cornerRef = useRef(null);
   const opened = phase === "opened";
@@ -85,6 +132,10 @@ export default function App() {
       </svg>
     </button>
   );
+
+  if (!ready) {
+    return <Loader loaded={loaded} total={total} />;
+  }
 
   if (savedAt && !reread) {
     return <Keepsake yesMessage={content.yesMessage} photos={photos} savedAt={savedAt} onReread={() => { setReread(true); window.scrollTo(0, 0); }} />;

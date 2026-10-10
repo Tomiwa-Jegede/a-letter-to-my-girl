@@ -95,6 +95,16 @@ button { font: inherit; }
 .hint { font-style: italic; color: var(--muted); font-size: 1.05rem; margin: 0.5rem 0 0; animation: pulse 2.4s ease-in-out infinite; }
 @keyframes pulse { 50% { opacity: 0.45; } }
 
+/* ---------- loader ---------- */
+.loader-wrap { display: grid; place-items: center; }
+.loader { display: flex; flex-direction: column; align-items: center; gap: 1rem; text-align: center; padding: 2rem 0; }
+.loader-seal { width: 5rem; animation: pulse 2.4s ease-in-out infinite; }
+.loader-seal svg { display: block; width: 100%; height: 100%; }
+.loader-title { font-family: var(--script); font-weight: 400; font-size: clamp(2.5rem, 9vw, 3.5rem); line-height: 1.1; margin: 0; color: var(--petal); }
+.loader-track { width: min(100%, 16rem); height: 0.4rem; background: var(--plum-line); border-radius: 999px; overflow: hidden; }
+.loader-fill { height: 100%; background: var(--rose); border-radius: inherit; transition: width 0.25s ease; }
+.loader-count { margin: 0; color: var(--muted); font-style: italic; font-variant-numeric: tabular-nums; }
+
 /* ---------- letter ---------- */
 .mini-env {
   position: fixed; z-index: 20; width: 2.75rem; height: 2.75rem; border-radius: 50%; cursor: pointer;
