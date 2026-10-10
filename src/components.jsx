@@ -96,7 +96,6 @@ export function VideoCard({ src, poster, caption }) {
           poster={poster}
           playsInline
           preload="none"
-          muted
           loop={false}
         />
         {!playing && <span className="vplay">▶</span>}
