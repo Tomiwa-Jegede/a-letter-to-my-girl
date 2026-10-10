@@ -4,15 +4,19 @@ import { AskBlock, Envelope, Heart, Keepsake, Loader, PhotoCard, Reveal, VideoCa
 
 const EASE = "cubic-bezier(.2,.7,.2,1)";
 
-// Every file the page shows: photos, video posters, clips, voice note. Duplicates removed.
-const ASSETS = (() => {
-  const urls = [];
+// What the opening needs (photos, posters, voice) vs what can warm up
+// silently afterwards (the clips). Duplicates removed.
+const { CRITICAL, DEFERRED } = (() => {
+  const critical = [];
+  const deferred = [];
   for (const b of content.blocks) {
-    if (b.type === "photo") urls.push(b.src);
-    else if (b.type === "video") urls.push(b.poster, b.src);
-    else if (b.type === "voice") urls.push(b.src);
+    if (b.type === "photo") critical.push(b.src);
+    else if (b.type === "video") {
+      critical.push(b.poster);
+      deferred.push(b.src);
+    } else if (b.type === "voice") critical.push(b.src);
   }
-  return [...new Set(urls)];
+  return { CRITICAL: [...new Set(critical)], DEFERRED: [...new Set(deferred)] };
 })();
 
 // When she said yes (ISO string) or null. /?reset=1 clears it so you can test again.
@@ -29,38 +33,38 @@ const readYes = () => {
   }
 };
 
-// Warms every photo, poster, clip and the voice note into the browser cache,
-// with honest progress. A failed file still resolves (it must never trap her),
-// plus an overall failsafe so the page always opens.
+// Warms the critical files into the browser cache with honest progress.
+// The bar tracks exactly how close the page is to opening: the moment it
+// hits 100%, the page opens — no extra wait. A failed file still resolves
+// (it must never trap her), plus an overall failsafe so the page always opens.
 function usePreload(urls) {
+  const wantFonts = typeof document !== "undefined" && !!document.fonts;
+  const total = urls.length + (wantFonts ? 1 : 0);
   const [loaded, setLoaded] = useState(0);
-  const [done, setDone] = useState(urls.length === 0);
+  const [done, setDone] = useState(total === 0);
   useEffect(() => {
-    if (urls.length === 0) return;
+    if (total === 0) return;
     let alive = true;
-    const t0 = performance.now();
     let n = 0;
     const tick = () => {
       n += 1;
       if (!alive) return;
       setLoaded(n);
-      if (n >= urls.length) {
-        const wait = Math.max(0, 600 - (performance.now() - t0)); // no flash on fast networks
-        setTimeout(() => alive && setDone(true), wait);
-      }
+      if (n >= total) setDone(true);
     };
     urls.forEach((url) => {
       fetch(url).then(() => tick()).catch(() => tick());
     });
-    const failsafe = setTimeout(() => alive && setDone(true), 30000);
+    if (wantFonts) document.fonts.ready.then(() => tick()).catch(() => tick());
+    const failsafe = setTimeout(() => alive && setDone(true), 20000);
     return () => {
       alive = false;
       clearTimeout(failsafe);
     };
-    // ASSETS is a static module constant; preload once.
+    // CRITICAL is a static module constant; preload once.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  return { loaded, total: urls.length, done };
+  return { loaded, total, done };
 }
 
 export default function App() {
@@ -69,8 +73,14 @@ export default function App() {
   const [reread, setReread] = useState(false);
   const [phase, setPhase] = useState(() => (savedAt ? "opened" : "sealed"));
   const photos = content.blocks.filter((b) => b.type === "photo").map((b) => b.src);
-  // Everything on screen waits for these: photos, posters, clips, voice note.
-  const { loaded, total, ready } = usePreload(ASSETS);
+  // The MVPs gate the opening; the clips warm up silently once we're in.
+  const { loaded, total, done } = usePreload(CRITICAL);
+  useEffect(() => {
+    if (!done) return;
+    DEFERRED.forEach((url) => {
+      fetch(url).catch(() => {});
+    });
+  }, [done]);
   const envRef = useRef(null);
   const cornerRef = useRef(null);
   const opened = phase === "opened";
@@ -133,7 +143,7 @@ export default function App() {
     </button>
   );
 
-  if (!ready) {
+  if (!done) {
     return <Loader loaded={loaded} total={total} />;
   }
 
